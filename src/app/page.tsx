@@ -5,6 +5,8 @@ import CompanyFactsSection from "@/components/CompanyFactsSection";
 import GallerySection from "@/components/GallerySection";
 import CertificationsSection from "@/components/CertificationsSection";
 import Footer from "@/components/Footer";
+import AdminGalleryForm from "@/components/AdminGalleryForm";
+import AdminGalleryImages from "@/components/AdminGalleryImages";
 
 export default function HomePage() {
   return (

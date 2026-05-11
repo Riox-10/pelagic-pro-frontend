@@ -13,6 +13,8 @@ import AdminMessages from "@/components/AdminMessages";
 import AdminEmailsList from "@/components/AdminEmailsList";
 import AdminCertificateForm from "@/components/AdminCertificateForm";
 import AdminCertifications from "@/components/AdminCertifications";
+import AdminGalleryForm from "@/components/AdminGalleryForm";
+import AdminGalleryImages from "@/components/AdminGalleryImages";
 
 type ContactMessage = {
   id: number;
@@ -46,12 +48,22 @@ type Certificate = {
   created_at?: string;
 };
 
+type GalleryImage = {
+  id: number | string;
+  title: string;
+  image: string;
+  description?: string;
+  is_active?: boolean;
+  created_at?: string;
+};
+
 export default function AdminPage() {
   const router = useRouter();
 
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
 
   const [isChecking, setIsChecking] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -111,16 +123,21 @@ export default function AdminPage() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
 
-        const [messagesResponse, productsResponse, certificatesResponse] =
-          await Promise.all([
-            fetch(`${apiUrl}/contact-messages/`, {
-              headers: {
-                Authorization: `Token ${token}`,
-              },
-            }),
-            fetch(`${apiUrl}/products/`),
-            fetch(`${apiUrl}/certificates/`),
-          ]);
+        const [
+          messagesResponse,
+          productsResponse,
+          certificatesResponse,
+          galleryImagesResponse,
+        ] = await Promise.all([
+          fetch(`${apiUrl}/contact-messages/`, {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }),
+          fetch(`${apiUrl}/products/`),
+          fetch(`${apiUrl}/certificates/`),
+          fetch(`${apiUrl}/gallery-images/`),
+        ]);
 
         if (messagesResponse.status === 401 || messagesResponse.status === 403) {
           localStorage.removeItem("admin_token");
@@ -140,15 +157,23 @@ export default function AdminPage() {
           ? await certificatesResponse.json()
           : [];
 
+        const galleryImagesData = galleryImagesResponse.ok
+          ? await galleryImagesResponse.json()
+          : [];
+
         setMessages(Array.isArray(messagesData) ? messagesData : []);
         setProducts(Array.isArray(productsData) ? productsData : []);
         setCertificates(
           Array.isArray(certificatesData) ? certificatesData : []
         );
+        setGalleryImages(
+          Array.isArray(galleryImagesData) ? galleryImagesData : []
+        );
       } catch {
         setMessages([]);
         setProducts([]);
         setCertificates([]);
+        setGalleryImages([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -261,6 +286,27 @@ export default function AdminPage() {
                     currentCertificates.filter(
                       (certificate) =>
                         String(certificate.id) !== String(certificateId)
+                    )
+                  );
+                }}
+              />
+
+              <AdminGalleryForm
+                onGalleryImageCreated={(galleryImage: GalleryImage) => {
+                  setGalleryImages((currentGalleryImages) => [
+                    galleryImage,
+                    ...currentGalleryImages,
+                  ]);
+                }}
+              />
+
+              <AdminGalleryImages
+                galleryImages={galleryImages}
+                onGalleryImageDeleted={(galleryImageId) => {
+                  setGalleryImages((currentGalleryImages) =>
+                    currentGalleryImages.filter(
+                      (galleryImage) =>
+                        String(galleryImage.id) !== String(galleryImageId)
                     )
                   );
                 }}
