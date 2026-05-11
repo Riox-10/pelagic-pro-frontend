@@ -82,16 +82,15 @@ export default function GallerySection() {
               key={item.id}
               className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="relative h-48 bg-slate-100">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
-                />
-              </div>
-
+            <div className="relative h-48 bg-white">
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              className="object-contain p-3 transition duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+            />
+            </div>
               <div className="p-4 text-center">
                 <h3 className="text-sm font-bold text-slate-900">
                   {item.title}
