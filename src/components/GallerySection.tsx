@@ -102,19 +102,25 @@ export default function GallerySection() {
     fetchGalleryImages();
   }, []);
 
-  const galleryItems = useMemo(() => {
-    const allItems = [...localGalleryItems, ...djangoGalleryItems];
+const galleryItems = useMemo(() => {
+  const mergedItems = [...localGalleryItems];
 
-    return allItems.filter(
-      (item, index, array) =>
-        index ===
-        array.findIndex(
-          (currentItem) =>
-            currentItem.title.toLowerCase().trim() ===
-            item.title.toLowerCase().trim()
-        )
+  djangoGalleryItems.forEach((djangoItem) => {
+    const existingIndex = mergedItems.findIndex(
+      (localItem) =>
+        localItem.title.toLowerCase().trim() ===
+        djangoItem.title.toLowerCase().trim()
     );
-  }, [djangoGalleryItems]);
+
+    if (existingIndex !== -1) {
+      mergedItems[existingIndex] = djangoItem;
+    } else {
+      mergedItems.push(djangoItem);
+    }
+  });
+
+  return mergedItems;
+}, [djangoGalleryItems]);
 
   return (
     <section className="bg-slate-50 py-20 sm:py-24">
