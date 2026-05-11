@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { companyData } from "@/data/companyData";
 
 const navLinks = [
@@ -13,6 +13,26 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [adminLink, setAdminLink] = useState({
+    label: "Se connecter",
+    href: "/admin/login",
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+
+    if (token) {
+      setAdminLink({
+        label: "Admin",
+        href: "/admin",
+      });
+    } else {
+      setAdminLink({
+        label: "Se connecter",
+        href: "/admin/login",
+      });
+    }
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
@@ -48,6 +68,13 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          <Link
+            href={adminLink.href}
+            className="rounded-full bg-slate-950 px-5 py-2 text-sm font-bold text-white transition hover:bg-sky-600"
+          >
+            {adminLink.label}
+          </Link>
         </div>
 
         <button
@@ -73,6 +100,14 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            <Link
+              href={adminLink.href}
+              onClick={() => setIsOpen(false)}
+              className="rounded-lg bg-slate-950 px-3 py-2 text-sm font-bold text-white transition hover:bg-sky-600"
+            >
+              {adminLink.label}
+            </Link>
           </div>
         </div>
       )}

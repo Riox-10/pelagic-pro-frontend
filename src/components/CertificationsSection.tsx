@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CertificateCard from "@/components/CertificateCard";
 import { certificatesData } from "@/data/certificatesData";
 
@@ -13,6 +13,8 @@ type Certificate = {
 };
 
 export default function CertificationsSection() {
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+
   const [djangoCertificates, setDjangoCertificates] = useState<Certificate[]>(
     []
   );
@@ -36,6 +38,7 @@ export default function CertificationsSection() {
             data.map((certificate) => ({
               ...certificate,
               id: `db-${certificate.id}`,
+              image: certificate.image || "/images/logo.png",
               alt: certificate.alt || certificate.name,
             }))
           );
@@ -69,6 +72,17 @@ export default function CertificationsSection() {
     return uniqueCertificates;
   }, [djangoCertificates]);
 
+  function scrollCertificates(direction: "left" | "right") {
+    if (!sliderRef.current) {
+      return;
+    }
+
+    sliderRef.current.scrollBy({
+      left: direction === "left" ? -350 : 350,
+      behavior: "smooth",
+    });
+  }
+
   return (
     <section className="bg-white py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -88,14 +102,52 @@ export default function CertificationsSection() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-12 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Faites défiler
+            </p>
+            <h3 className="mt-2 text-xl font-bold text-slate-900">
+              Plus de certificats disponibles
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => scrollCertificates("left")}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-xl font-bold text-slate-700 shadow-sm transition hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600"
+              aria-label="Voir les certificats précédents"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              onClick={() => scrollCertificates("right")}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-xl font-bold text-slate-700 shadow-sm transition hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600"
+              aria-label="Voir les certificats suivants"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={sliderRef}
+          className="mt-8 flex gap-6 overflow-x-auto scroll-smooth pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {certificates.map((certificate) => (
-            <CertificateCard
+            <div
               key={certificate.id}
-              name={certificate.name}
-              image={certificate.image || "/images/logo.png"}
-              alt={certificate.alt || certificate.name}
-            />
+              className="min-w-[260px] max-w-[260px] sm:min-w-[300px] sm:max-w-[300px]"
+            >
+              <CertificateCard
+                name={certificate.name}
+                image={certificate.image || "/images/logo.png"}
+                alt={certificate.alt || certificate.name}
+              />
+            </div>
           ))}
         </div>
       </div>
