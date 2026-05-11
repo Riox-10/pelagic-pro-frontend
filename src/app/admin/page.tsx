@@ -15,6 +15,8 @@ import AdminCertificateForm from "@/components/AdminCertificateForm";
 import AdminCertifications from "@/components/AdminCertifications";
 import AdminGalleryForm from "@/components/AdminGalleryForm";
 import AdminGalleryImages from "@/components/AdminGalleryImages";
+import AdminCompanyFactForm from "@/components/AdminCompanyFactForm";
+import AdminCompanyFacts from "@/components/AdminCompanyFacts";
 
 type ContactMessage = {
   id: number;
@@ -48,6 +50,16 @@ type Certificate = {
   created_at?: string;
 };
 
+type CompanyFact = {
+  id: number | string;
+  label: string;
+  value: string;
+  description: string;
+  order?: number;
+  is_active?: boolean;
+  created_at?: string;
+};
+
 type GalleryImage = {
   id: number | string;
   title: string;
@@ -64,6 +76,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [companyFacts, setCompanyFacts] = useState<CompanyFact[]>([]);
 
   const [isChecking, setIsChecking] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -124,21 +137,22 @@ export default function AdminPage() {
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
 
         const [
-          messagesResponse,
-          productsResponse,
-          certificatesResponse,
-          galleryImagesResponse,
-        ] = await Promise.all([
-          fetch(`${apiUrl}/contact-messages/`, {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
-          }),
-          fetch(`${apiUrl}/products/`),
-          fetch(`${apiUrl}/certificates/`),
-          fetch(`${apiUrl}/gallery-images/`),
-        ]);
-
+  messagesResponse,
+  productsResponse,
+  certificatesResponse,
+  galleryImagesResponse,
+  companyFactsResponse,
+] = await Promise.all([
+  fetch(`${apiUrl}/contact-messages/`, {
+    headers: {
+      Authorization: `Token ${token}`,
+    },
+  }),
+  fetch(`${apiUrl}/products/`),
+  fetch(`${apiUrl}/certificates/`),
+  fetch(`${apiUrl}/gallery-images/`),
+  fetch(`${apiUrl}/company-facts/`),
+]);
         if (messagesResponse.status === 401 || messagesResponse.status === 403) {
           localStorage.removeItem("admin_token");
           router.replace("/admin/login");
@@ -160,7 +174,9 @@ export default function AdminPage() {
         const galleryImagesData = galleryImagesResponse.ok
           ? await galleryImagesResponse.json()
           : [];
-
+        const companyFactsData = companyFactsResponse.ok
+  ? await companyFactsResponse.json()
+  : [];
         setMessages(Array.isArray(messagesData) ? messagesData : []);
         setProducts(Array.isArray(productsData) ? productsData : []);
         setCertificates(
@@ -169,11 +185,15 @@ export default function AdminPage() {
         setGalleryImages(
           Array.isArray(galleryImagesData) ? galleryImagesData : []
         );
+        setCompanyFacts(
+  Array.isArray(companyFactsData) ? companyFactsData : []
+);
       } catch {
         setMessages([]);
         setProducts([]);
         setCertificates([]);
         setGalleryImages([]);
+        setCompanyFacts([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -312,6 +332,34 @@ export default function AdminPage() {
                 }}
               />
             </div>
+            <AdminCompanyFactForm
+  onCompanyFactCreated={(companyFact: CompanyFact) => {
+    setCompanyFacts((currentCompanyFacts) => [
+      companyFact,
+      ...currentCompanyFacts,
+    ]);
+  }}
+/>
+
+<AdminCompanyFacts
+  companyFacts={companyFacts}
+  onCompanyFactUpdated={(updatedCompanyFact: CompanyFact) => {
+    setCompanyFacts((currentCompanyFacts) =>
+      currentCompanyFacts.map((companyFact) =>
+        String(companyFact.id) === String(updatedCompanyFact.id)
+          ? updatedCompanyFact
+          : companyFact
+      )
+    );
+  }}
+  onCompanyFactDeleted={(companyFactId) => {
+    setCompanyFacts((currentCompanyFacts) =>
+      currentCompanyFacts.filter(
+        (companyFact) => String(companyFact.id) !== String(companyFactId)
+      )
+    );
+  }}
+/>
           </div>
         )}
       </section>
