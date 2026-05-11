@@ -321,16 +321,24 @@ export default function AdminPage() {
               />
 
               <AdminGalleryImages
-                galleryImages={galleryImages}
-                onGalleryImageDeleted={(galleryImageId) => {
-                  setGalleryImages((currentGalleryImages) =>
-                    currentGalleryImages.filter(
-                      (galleryImage) =>
-                        String(galleryImage.id) !== String(galleryImageId)
-                    )
-                  );
-                }}
-              />
+  galleryImages={galleryImages}
+  onGalleryImageUpdated={(updatedGalleryImage: GalleryImage) => {
+    setGalleryImages((currentGalleryImages) =>
+      currentGalleryImages.map((galleryImage) =>
+        String(galleryImage.id) === String(updatedGalleryImage.id)
+          ? updatedGalleryImage
+          : galleryImage
+      )
+    );
+  }}
+  onGalleryImageDeleted={(galleryImageId) => {
+    setGalleryImages((currentGalleryImages) =>
+      currentGalleryImages.filter(
+        (galleryImage) => String(galleryImage.id) !== String(galleryImageId)
+      )
+    );
+  }}
+/>
             </div>
             <AdminCompanyFactForm
   onCompanyFactCreated={(companyFact: CompanyFact) => {
