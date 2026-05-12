@@ -274,15 +274,24 @@ export default function AdminPage() {
               />
 
               <AdminProductsTable
-                products={products}
-                onProductDeleted={(productId) => {
-                  setProducts((currentProducts) =>
-                    currentProducts.filter(
-                      (product) => String(product.id) !== String(productId)
-                    )
-                  );
-                }}
-              />
+  products={products}
+  onProductUpdated={(updatedProduct: Product) => {
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
+        String(product.id) === String(updatedProduct.id)
+          ? updatedProduct
+          : product
+      )
+    );
+  }}
+  onProductDeleted={(productId) => {
+    setProducts((currentProducts) =>
+      currentProducts.filter(
+        (product) => String(product.id) !== String(productId)
+      )
+    );
+  }}
+/>
 
               <AdminMessages messages={messages} />
             </div>
