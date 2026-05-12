@@ -17,6 +17,8 @@ import AdminGalleryForm from "@/components/AdminGalleryForm";
 import AdminGalleryImages from "@/components/AdminGalleryImages";
 import AdminCompanyFactForm from "@/components/AdminCompanyFactForm";
 import AdminCompanyFacts from "@/components/AdminCompanyFacts";
+import AdminCompanyImageForm from "@/components/AdminCompanyImageForm";
+import AdminCompanyImages from "@/components/AdminCompanyImages";
 
 type ContactMessage = {
   id: number;
@@ -68,6 +70,15 @@ type GalleryImage = {
   is_active?: boolean;
   created_at?: string;
 };
+type CompanyImage = {
+  id: number | string;
+  title: string;
+  image: string;
+  alt?: string;
+  order?: number;
+  is_active?: boolean;
+  created_at?: string;
+};
 
 export default function AdminPage() {
   const router = useRouter();
@@ -77,6 +88,7 @@ export default function AdminPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [companyFacts, setCompanyFacts] = useState<CompanyFact[]>([]);
+  const [companyImages, setCompanyImages] = useState<CompanyImage[]>([]);
 
   const [isChecking, setIsChecking] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -142,6 +154,7 @@ export default function AdminPage() {
   certificatesResponse,
   galleryImagesResponse,
   companyFactsResponse,
+  companyImagesResponse,
 ] = await Promise.all([
   fetch(`${apiUrl}/contact-messages/`, {
     headers: {
@@ -152,6 +165,7 @@ export default function AdminPage() {
   fetch(`${apiUrl}/certificates/`),
   fetch(`${apiUrl}/gallery-images/`),
   fetch(`${apiUrl}/company-facts/`),
+  fetch(`${apiUrl}/company-images/`),
 ]);
         if (messagesResponse.status === 401 || messagesResponse.status === 403) {
           localStorage.removeItem("admin_token");
@@ -182,11 +196,17 @@ export default function AdminPage() {
         setCertificates(
           Array.isArray(certificatesData) ? certificatesData : []
         );
+        const companyImagesData = companyImagesResponse.ok
+  ? await companyImagesResponse.json()
+  : [];
         setGalleryImages(
           Array.isArray(galleryImagesData) ? galleryImagesData : []
         );
         setCompanyFacts(
   Array.isArray(companyFactsData) ? companyFactsData : []
+);
+setCompanyImages(
+  Array.isArray(companyImagesData) ? companyImagesData : []
 );
       } catch {
         setMessages([]);
@@ -194,6 +214,7 @@ export default function AdminPage() {
         setCertificates([]);
         setGalleryImages([]);
         setCompanyFacts([]);
+        setCompanyImages([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -352,6 +373,34 @@ export default function AdminPage() {
     setGalleryImages((currentGalleryImages) =>
       currentGalleryImages.filter(
         (galleryImage) => String(galleryImage.id) !== String(galleryImageId)
+      )
+    );
+  }}
+/>
+<AdminCompanyImageForm
+  onCompanyImageCreated={(companyImage: CompanyImage) => {
+    setCompanyImages((currentCompanyImages) => [
+      companyImage,
+      ...currentCompanyImages,
+    ]);
+  }}
+/>
+
+<AdminCompanyImages
+  companyImages={companyImages}
+  onCompanyImageUpdated={(updatedCompanyImage: CompanyImage) => {
+    setCompanyImages((currentCompanyImages) =>
+      currentCompanyImages.map((companyImage) =>
+        String(companyImage.id) === String(updatedCompanyImage.id)
+          ? updatedCompanyImage
+          : companyImage
+      )
+    );
+  }}
+  onCompanyImageDeleted={(companyImageId) => {
+    setCompanyImages((currentCompanyImages) =>
+      currentCompanyImages.filter(
+        (companyImage) => String(companyImage.id) !== String(companyImageId)
       )
     );
   }}

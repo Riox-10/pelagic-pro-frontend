@@ -1,7 +1,71 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import { companyData } from "@/data/companyData";
 
+type CompanyImage = {
+  id: number | string;
+  title?: string;
+  src: string;
+  image?: string;
+  alt: string;
+  order?: number;
+  is_active?: boolean;
+  created_at?: string;
+};
+
 export default function AboutSection() {
+  const [djangoCompanyImages, setDjangoCompanyImages] = useState<
+    CompanyImage[]
+  >([]);
+
+  useEffect(() => {
+    async function fetchCompanyImages() {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+
+        const response = await fetch(`${apiUrl}/company-images/`);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setDjangoCompanyImages(
+            data.map((image) => ({
+              ...image,
+              id: `db-${image.id}`,
+              src: image.image || "/images/logo.png",
+              alt: image.alt || image.title || "Image Pelagic Pro",
+            }))
+          );
+        }
+      } catch {
+        setDjangoCompanyImages([]);
+      }
+    }
+
+    fetchCompanyImages();
+  }, []);
+
+  const companyImages = useMemo(() => {
+    if (djangoCompanyImages.length > 0) {
+      return djangoCompanyImages;
+    }
+
+    return companyData.companyImages.map((image, index) => ({
+      id: `local-${index + 1}`,
+      src: image.src,
+      alt: image.alt,
+      title: image.alt,
+      order: index + 1,
+    }));
+  }, [djangoCompanyImages]);
+
   return (
     <section className="bg-slate-50 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -28,6 +92,7 @@ export default function AboutSection() {
                   <h3 className="text-lg font-bold text-slate-900">
                     {item.title}
                   </h3>
+
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {item.description}
                   </p>
@@ -37,9 +102,9 @@ export default function AboutSection() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {companyData.companyImages.map((image, index) => (
+            {companyImages.map((image, index) => (
               <div
-                key={image.src}
+                key={image.id}
                 className={`relative overflow-hidden rounded-3xl bg-slate-200 shadow-md ${
                   index === 0 || index === 3 ? "h-72" : "h-56"
                 }`}
@@ -49,6 +114,7 @@ export default function AboutSection() {
                   alt={image.alt}
                   fill
                   className="object-cover transition duration-500 hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
             ))}
@@ -67,7 +133,9 @@ export default function AboutSection() {
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-lg font-bold">
                   ✓
                 </div>
+
                 <h4 className="font-semibold text-white">{item.title}</h4>
+
                 <p className="mt-2 text-sm leading-6 text-slate-300">
                   {item.description}
                 </p>
