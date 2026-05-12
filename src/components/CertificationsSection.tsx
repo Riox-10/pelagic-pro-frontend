@@ -51,26 +51,16 @@ export default function CertificationsSection() {
     fetchCertificates();
   }, []);
 
-  const certificates = useMemo(() => {
-    const localCertificates = certificatesData.map((certificate) => ({
-      ...certificate,
-      id: `local-${certificate.id}`,
-    }));
+const certificates = useMemo(() => {
+  if (djangoCertificates.length > 0) {
+    return djangoCertificates;
+  }
 
-    const allCertificates = [...localCertificates, ...djangoCertificates];
-
-    const uniqueCertificates = allCertificates.filter(
-      (certificate, index, array) =>
-        index ===
-        array.findIndex(
-          (item) =>
-            item.name.toLowerCase().trim() ===
-            certificate.name.toLowerCase().trim()
-        )
-    );
-
-    return uniqueCertificates;
-  }, [djangoCertificates]);
+  return certificatesData.map((certificate) => ({
+    ...certificate,
+    id: `local-${certificate.id}`,
+  }));
+}, [djangoCertificates]);
 
   function scrollCertificates(direction: "left" | "right") {
     if (!sliderRef.current) {

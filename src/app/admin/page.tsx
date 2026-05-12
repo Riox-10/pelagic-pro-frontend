@@ -300,16 +300,24 @@ export default function AdminPage() {
               />
 
               <AdminCertifications
-                certificates={certificates}
-                onCertificateDeleted={(certificateId) => {
-                  setCertificates((currentCertificates) =>
-                    currentCertificates.filter(
-                      (certificate) =>
-                        String(certificate.id) !== String(certificateId)
-                    )
-                  );
-                }}
-              />
+  certificates={certificates}
+  onCertificateUpdated={(updatedCertificate: Certificate) => {
+    setCertificates((currentCertificates) =>
+      currentCertificates.map((certificate) =>
+        String(certificate.id) === String(updatedCertificate.id)
+          ? updatedCertificate
+          : certificate
+      )
+    );
+  }}
+  onCertificateDeleted={(certificateId) => {
+    setCertificates((currentCertificates) =>
+      currentCertificates.filter(
+        (certificate) => String(certificate.id) !== String(certificateId)
+      )
+    );
+  }}
+/>
 
               <AdminGalleryForm
                 onGalleryImageCreated={(galleryImage: GalleryImage) => {
