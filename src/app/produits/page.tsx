@@ -13,6 +13,8 @@ type Product = {
   category: string;
   weight?: string;
   packaging?: string;
+  packing?: string;
+  origin?: string;
   description?: string;
   image?: string;
   alt?: string;
@@ -42,6 +44,7 @@ async function getDjangoProducts(): Promise<Product[]> {
       ...product,
       id: `db-${product.id}`,
       alt: product.alt || product.name,
+      packaging: product.packaging || product.packing || "",
     }));
   } catch {
     return [];
@@ -54,9 +57,10 @@ export default async function ProduitsPage() {
   const localProducts = productsData.map((product) => ({
     ...product,
     id: `local-${product.id}`,
+    packaging: product.packing || "",
   }));
 
-  const products = [...localProducts, ...djangoProducts];
+  const products = djangoProducts.length > 0 ? djangoProducts : localProducts;
 
   return (
     <>
